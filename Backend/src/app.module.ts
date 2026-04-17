@@ -30,8 +30,11 @@ import { AppService } from './app.service';
         password: config.get<string>('DB_PASSWORD'),
         database: config.get<string>('DB_NAME'),
         entities: [User, MenuCategory, MenuItem, Reservation, Table],
-        synchronize: process.env.NODE_ENV !== 'production',
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        //synchronize: process.env.NODE_ENV !== 'production',
+        //ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+        synchronize: false,
+        // Supabase REQUIRED SSL for production
+        ssl: { rejectUnauthorized: false },
       }),
     }),
     // AuthModule,
