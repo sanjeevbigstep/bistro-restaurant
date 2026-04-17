@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -20,17 +20,20 @@ import { Table } from './reservations/entities/table.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        host: config.get<string>('DB_HOST'),
-        port: config.get<number>('DB_PORT'),
-        username: config.get<string>('DB_USERNAME'),
-        password: config.get<string>('DB_PASSWORD'),
-        database: config.get<string>('DB_NAME'),
-        entities: [User, MenuCategory, MenuItem, Reservation, Table],
-        synchronize: process.env.NODE_ENV !== 'production',
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-      }),
+      useFactory: (config: ConfigService) => {
+        Logger.log(`Connecting to DB at ${config.get('DB_HOST')}:${config.get('DB_PORT')}`, 'DatabaseInit');
+        return {
+          type: 'postgres',
+          host: config.get<string>('DB_HOST'),
+          port: config.get<number>('DB_PORT'),
+          username: config.get<string>('DB_USERNAME'),
+          password: config.get<string>('DB_PASSWORD'),
+          database: config.get<string>('DB_NAME'),
+          entities: [User, MenuCategory, MenuItem, Reservation, Table],
+          synchronize: process.env.NODE_ENV !== 'production',
+          ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      }
+    },
     }),
     AuthModule,
     UsersModule,
@@ -39,4 +42,10 @@ import { Table } from './reservations/entities/table.entity';
     DashboardModule,
   ],
 })
-export class AppModule {}
+export class AppModule implements OnModuleInit {
+  private readonly logger = new Logger(AppModule.name);
+
+  onModuleInit() {
+    this.logger.log('AppModule has been initialized...');
+  }
+}
