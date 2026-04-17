@@ -1,4 +1,4 @@
-import { Module, Logger, OnModuleInit } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -12,40 +12,35 @@ import { MenuCategory } from './menu/entities/menu-category.entity';
 import { MenuItem } from './menu/entities/menu-item.entity';
 import { Reservation } from './reservations/entities/reservation.entity';
 import { Table } from './reservations/entities/table.entity';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => {
-        Logger.log(`Connecting to DB at ${config.get('DB_HOST')}:${config.get('DB_PORT')}`, 'DatabaseInit');
-        return {
-          type: 'postgres',
-          host: config.get<string>('DB_HOST'),
-          port: config.get<number>('DB_PORT'),
-          username: config.get<string>('DB_USERNAME'),
-          password: config.get<string>('DB_PASSWORD'),
-          database: config.get<string>('DB_NAME'),
-          entities: [User, MenuCategory, MenuItem, Reservation, Table],
-          synchronize: process.env.NODE_ENV !== 'production',
-          ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-      }
-    },
-    }),
-    AuthModule,
-    UsersModule,
-    MenuModule,
-    ReservationsModule,
-    DashboardModule,
+    // TypeOrmModule.forRootAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (config: ConfigService) => ({
+    //     type: 'postgres',
+    //     host: config.get<string>('DB_HOST'),
+    //     port: config.get<number>('DB_PORT'),
+    //     username: config.get<string>('DB_USERNAME'),
+    //     password: config.get<string>('DB_PASSWORD'),
+    //     database: config.get<string>('DB_NAME'),
+    //     entities: [User, MenuCategory, MenuItem, Reservation, Table],
+    //     synchronize: process.env.NODE_ENV !== 'production',
+    //     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    //   }),
+    // }),
+    // AuthModule,
+    // UsersModule,
+    // MenuModule,
+    // ReservationsModule,
+    // DashboardModule,
   ],
+  controllers: [AppController],
+  providers: [AppService]
 })
-export class AppModule implements OnModuleInit {
-  private readonly logger = new Logger(AppModule.name);
-
-  onModuleInit() {
-    this.logger.log('AppModule has been initialized...');
-  }
-}
+export class AppModule {}
