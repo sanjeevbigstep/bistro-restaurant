@@ -25,10 +25,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   // Vercel handles the port; this keeps local development working
-  if (process.env.NODE_ENV !== 'production') {
+  //if (process.env.NODE_ENV !== 'production') {
     const port = process.env.PORT ?? 3001;
     await app.listen(port);
-  }
+  //}
 
   // Essential for Vercel: Access and export the underlying Express instance
   await app.init();
