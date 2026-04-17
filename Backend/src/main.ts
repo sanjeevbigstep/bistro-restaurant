@@ -2,9 +2,10 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.use(helmet());
 
@@ -23,8 +24,16 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  const port = process.env.PORT ?? 3001;
-  await app.listen(port);
+  // Vercel handles the port; this keeps local development working
+  if (process.env.NODE_ENV !== 'production') {
+    const port = process.env.PORT ?? 3001;
+    await app.listen(port);
+  }
+
+  // Essential for Vercel: Access and export the underlying Express instance
+  await app.init();
+  return app.getHttpAdapter().getInstance();
 }
 
-bootstrap();
+// Export the handler for Vercel
+export default bootstrap();
